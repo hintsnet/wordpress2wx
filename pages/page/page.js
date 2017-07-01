@@ -6,7 +6,7 @@
  * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
-var Api = require('../../utils/api.js');
+var wpApi = require('../../utils/api.js');
 var util = require('../../utils/util.js');
 var WxParse = require('../../wxParse/wxParse.js');
 
@@ -30,7 +30,7 @@ Page({
       hidden: false
     });
     wx.request({
-      url: Api.getPageByID(id, { mdrender: false }),
+      url: wpApi.getPageByID(id, { mdrender: false }),
       success: function (response) {
         console.log(response);
         self.setData({
@@ -50,7 +50,7 @@ Page({
   fetchPagesData: function() {
     var self = this;       
     wx.request({
-      url: Api.getPages(),
+      url: wpApi.getPages(),
       success: function (response) {
         self.setData({
               pagesList: response.data 
