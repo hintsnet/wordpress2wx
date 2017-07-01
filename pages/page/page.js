@@ -1,13 +1,9 @@
 /*
- * 
- * WordPres版微信小程序
- * author: jianbo
- * organization: 守望轩  www.watch-life.net
- * github:    https://github.com/iamxjb/winxin-app-watch-life.net
- * 技术支持微信号：iamxjb
- * 开源协议：MIT
- * Copyright (c) 2017 https://www.watch-life.net All rights reserved.
- * 
+ * WordPress 转微信小程序
+ * author               : pimgeek
+ * original author      : jianbo
+ * original github repo : https://github.com/iamxjb/winxin-app-watch-life.net
+ * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
 var Api = require('../../utils/api.js');
@@ -22,11 +18,13 @@ Page({
     hidden: false,
     wxParseData:[]
   },
-  onLoad: function (options) {
+
+  onLoad: function(options) {
     this.fetchData(options.id),
     this.fetchPagesData()
   },
-  fetchData: function (id) {
+
+  fetchData: function(id) {
     var self = this;
     self.setData({
       hidden: false
@@ -48,7 +46,8 @@ Page({
       }
     });   
   },
-  fetchPagesData: function () {
+
+  fetchPagesData: function() {
     var self = this;       
     wx.request({
       url: Api.getPages(),
