@@ -130,7 +130,7 @@ Page({
     });
   },
 
-  //获取文章列表数据
+  // 获取文章列表数据
   fetchPostsData: function(data) {
     var self = this;
 
@@ -206,7 +206,7 @@ Page({
     });
   },
 
-  //底部刷新
+  // 底部刷新
   loadMore: function(e) {
     var self = this;
     if (!self.data.isLastPage) {
@@ -224,7 +224,7 @@ Page({
     }
   },
 
-  //获取页面列表
+  // 获取页面列表
   fetchPagesData: function() {
     var self = this;
     wx.request({
@@ -237,7 +237,7 @@ Page({
     });
   },
 
-  //获取分类列表
+  // 获取分类列表
   fetchCategoriesData: function() {
     var self = this;
     wx.request({
@@ -260,7 +260,7 @@ Page({
     })
   },
 
-  //跳转至某分类下的文章列表
+  // 跳转至某分类下的文章列表
   redictIndex: function(e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id;
@@ -271,7 +271,7 @@ Page({
     });
   },
 
-  //跳转至某分类下的文章列表
+  // 跳转至某分类下的文章列表
   redictHome: function(e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id,
@@ -281,7 +281,7 @@ Page({
     });
   },
 
-  //浮动球移动事件
+  // 浮动球移动事件
   ballMoveEvent: function(e) {
     var touchs = e.touches[0];
     var pageX = touchs.pageX;
@@ -298,18 +298,18 @@ Page({
     });
   },
 
-  //浮动球点击 侧栏展开
+  // 浮动球点击->侧栏展开
   ballClickEvent: function() {
     slideUp.call(this);
   },
 
-  //遮罩点击  侧栏关闭
+  // 遮罩点击->侧栏关闭
   slideCloseEvent: function() {
     slideDown.call(this);
   }
 })
 
-//侧栏展开
+// 侧栏展开
 function slideUp() {
   var animation = wx.createAnimation({
     duration: 600
@@ -321,7 +321,7 @@ function slideUp() {
   });
 }
 
-//侧栏关闭
+// 侧栏关闭
 function slideDown() {
   var animation = wx.createAnimation({
     duration: 800
