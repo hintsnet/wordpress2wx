@@ -6,7 +6,7 @@
  * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
-var Api = require('../../utils/api.js');
+var wpApi = require('../../utils/api.js');
 var util = require('../../utils/util.js');
 var WxParse = require('../../wxParse/wxParse.js');
 
@@ -106,12 +106,12 @@ Page({
 
     //先优先获取置顶的文章
     wx.request({
-      url: Api.getStickyPosts(),
+      url: wpApi.getStickyPosts(),
       success: function (response) {
         if (response.data.length > 0) {
           self.setData({
             postsShowSwiperList: self.data.postsShowSwiperList.concat(response.data.map(function (item) {
-              item.firstImage = Api.getContentFirstImage(item.content.rendered);
+              item.firstImage = wpApi.getContentFirstImage(item.content.rendered);
               return item;
             }))
           });
@@ -149,7 +149,7 @@ Page({
     })
 
     wx.request({
-      url: Api.getPosts(data),
+      url: wpApi.getPosts(data),
       success: function (response) {
         if (response.statusCode === 200) {
           if (response.data.length < 6) {
@@ -165,7 +165,7 @@ Page({
               //var strSummary = util.removeHTML(item.content.rendered);
               // item.summary = util.cutstr(strSummary, 200, 0);
               var strdate = item.date
-              item.firstImage = Api.getContentFirstImage(item.content.rendered);
+              item.firstImage = wpApi.getContentFirstImage(item.content.rendered);
               item.date = util.cutstr(strdate, 10, 1);
               return item;
             })),
@@ -228,7 +228,7 @@ Page({
   fetchPagesData: function() {
     var self = this;
     wx.request({
-      url: Api.getPages(),
+      url: wpApi.getPages(),
       success: function(response) {
         self.setData({
           pagesList: response.data
@@ -241,7 +241,7 @@ Page({
   fetchCategoriesData: function() {
     var self = this;
     wx.request({
-      url: Api.getCategories(),
+      url: wpApi.getCategories(),
       success: function (response) {
         self.setData({
           categoriesList: response.data
