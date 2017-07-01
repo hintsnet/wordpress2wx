@@ -1,9 +1,9 @@
 /*
  * WordPress 转微信小程序
- * author: pimgeek
- * original author: jianbo
- * original github repo: https://github.com/iamxjb/winxin-app-watch-life.net
- * 
+ * author               : pimgeek
+ * original author      : jianbo
+ * original github repo : https://github.com/iamxjb/winxin-app-watch-life.net
+ * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
 App({
