@@ -6,7 +6,7 @@
  * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
-var Api = require('../../utils/api.js');
+var wpApi = require('../../utils/api.js');
 var util = require('../../utils/util.js');
 var WxParse = require('../../wxParse/wxParse.js');
 var app = getApp()
@@ -37,7 +37,7 @@ Page({
     content:'',
     userInfo:[]
   },
-  
+
   onLoad: function(options) {
     this.fetchDetailData(options.id);
     var self = this;
@@ -78,7 +78,7 @@ Page({
     var self = this;
    
     wx.request({
-      url: Api.getPostByID(id, { mdrender: false }),
+      url: wpApi.getPostByID(id, { mdrender: false }),
       success: function (response) {
         //console.log(response);
         self.setData({
@@ -109,7 +109,7 @@ Page({
       });
     };
     wx.request({
-      url: Api.getComments(data),
+      url: wpApi.getComments(data),
       success: function (response) {
         if (response.data.length < 6) {
           self.setData({
@@ -208,7 +208,7 @@ Page({
 
 
         wx.request({
-          url: Api.postComment(),
+          url: wpApi.postComment(),
           method: 'post',
           data: {
             post: postID,
