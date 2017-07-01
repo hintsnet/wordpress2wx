@@ -1,13 +1,9 @@
 /*
- * 
- * WordPres版微信小程序
- * author: jianbo
- * organization: 守望轩  www.watch-life.net
- * github:    https://github.com/iamxjb/winxin-app-watch-life.net
- * 技术支持微信号：iamxjb
- * 开源协议：MIT
- * 
- *  *Copyright (c) 2017 https://www.watch-life.net All rights reserved.
+ * WordPress 转微信小程序
+ * author               : pimgeek
+ * original author      : jianbo
+ * original github repo : https://github.com/iamxjb/winxin-app-watch-life.net
+ * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
 var Api = require('../../utils/api.js');
@@ -53,7 +49,8 @@ Page({
 
 
   },
-  formSubmit: function (e) {
+
+  formSubmit: function(e) {
     var url = '../list/list'
     if (e.detail.value.input != '') {
       url = url + '?search=' + e.detail.value.input;
@@ -62,8 +59,8 @@ Page({
       url: url
     })
   },
-  // onReachBottom: function () {
 
+  // onReachBottom: function () {
   //   var self = this;
   //   if (!self.data.isLastPage) {
   //     self.setData({
@@ -82,8 +79,9 @@ Page({
 
   // }
   // ,
+
   //底部刷新
-  loadMore: function (e) {
+  loadMore: function(e) {
 
     var self = this;
     if (!self.data.isLastPage) {
@@ -101,7 +99,8 @@ Page({
       });
     }
   },
-  onLoad: function (options) {
+
+  onLoad: function(options) {
     var self = this;
     if (options.categoryID && options.categoryID != 0) {
       self.setData({
@@ -133,8 +132,9 @@ Page({
       }
     });
   },
+  
   //获取文章列表数据
-  fetchPostsData: function (data) {
+  fetchPostsData: function(data) {
     var self = this;
 
   
@@ -216,7 +216,7 @@ Page({
   },
   
   //获取页面列表
-  fetchPagesData: function () {
+  fetchPagesData: function() {
     var self = this;
     wx.request({
       url: Api.getPages(),
@@ -229,7 +229,7 @@ Page({
   },
 
   //获取分类列表
-  fetchCategoriesData: function () {
+  fetchCategoriesData: function() {
     var self = this;
     wx.request({
       url: Api.getCategories(),
@@ -241,9 +241,8 @@ Page({
     });
   },
 
-
   // 跳转至查看文章详情
-  redictDetail: function (e) {
+  redictDetail: function(e) {
     // console.log('查看文章');
     var id = e.currentTarget.id,
       url = '../detail/detail?id=' + id;
@@ -253,7 +252,7 @@ Page({
   },
 
   //跳转至某分类下的文章列表
-  redictIndex: function (e) {
+  redictIndex: function(e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id;
     var name = e.currentTarget.dataset.item;
@@ -264,7 +263,7 @@ Page({
   },
 
   //跳转至某分类下的文章列表
-  redictHome: function (e) {
+  redictHome: function(e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id,
       url = '/pages/index/index';
@@ -274,9 +273,8 @@ Page({
     });
   },
 
-
   //浮动球移动事件
-  ballMoveEvent: function (e) {
+  ballMoveEvent: function(e) {
     var touchs = e.touches[0];
     var pageX = touchs.pageX;
     var pageY = touchs.pageY;
@@ -293,15 +291,14 @@ Page({
   },
 
   //浮动球点击 侧栏展开
-  ballClickEvent: function () {
+  ballClickEvent: function() {
     slideUp.call(this);
   },
 
   //遮罩点击  侧栏关闭
-  slideCloseEvent: function () {
+  slideCloseEvent: function() {
     slideDown.call(this);
   }
-
 })
 
 //侧栏展开
