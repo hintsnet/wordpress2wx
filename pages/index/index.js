@@ -45,7 +45,8 @@ Page({
     slideAnimation: {}
 
   },
-  formSubmit: function (e) {
+
+  formSubmit: function(e) {
     var url = '../list/list'
     if (e.detail.value.input != '') {
       url = url + '?search=' + e.detail.value.input;
@@ -54,7 +55,8 @@ Page({
       url: url
     })
   },
-  onShareAppMessage: function () {
+
+  onShareAppMessage: function() {
     return {
       title: '“守望轩”网站微信小程序',
       path: 'pages/index/index',
@@ -66,9 +68,11 @@ Page({
       }
     }
   },
+
   onReachBottom: function () {
     //console.log("xialajiazai");
   },
+
   onLoad: function (options) {
     var self = this;
     if (options.categoryID && options.categoryID != 0) {
@@ -205,6 +209,7 @@ Page({
       }
     });
   },
+
   //底部刷新
   loadMore: function(e) {
     var self = this;
@@ -222,6 +227,7 @@ Page({
       });
     }
   },
+  
   //获取页面列表
   fetchPagesData: function() {
     var self = this;
@@ -236,7 +242,7 @@ Page({
   },
 
   //获取分类列表
-  fetchCategoriesData: function () {
+  fetchCategoriesData: function() {
     var self = this;
     wx.request({
       url: Api.getCategories(),
@@ -249,7 +255,7 @@ Page({
   },
 
   // 跳转至查看文章详情
-  redictDetail: function (e) {
+  redictDetail: function(e) {
     // console.log('查看文章');
     var id = e.currentTarget.id,
       url = '../detail/detail?id=' + id;
@@ -259,7 +265,7 @@ Page({
   },
 
   //跳转至某分类下的文章列表
-  redictIndex: function (e) {
+  redictIndex: function(e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id;
     var name = e.currentTarget.dataset.item;
@@ -270,7 +276,7 @@ Page({
   },
 
   //跳转至某分类下的文章列表
-  redictHome: function (e) {
+  redictHome: function(e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id,
       url = '/pages/index/index';
@@ -280,7 +286,7 @@ Page({
   },
 
   //浮动球移动事件
-  ballMoveEvent: function (e) {
+  ballMoveEvent: function(e) {
     var touchs = e.touches[0];
     var pageX = touchs.pageX;
     var pageY = touchs.pageY;
