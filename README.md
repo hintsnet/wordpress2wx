@@ -1,6 +1,6 @@
 # 把 WordPress 站包装为微信小程序
 
-** 注：本项目基于 ["守望轩"官网 WordPress 微信小程序](https://github.com/iamxjb/winxin-app-watch-life.net) 开发。**
+**注：本项目基于 ["守望轩"官网 WordPress 微信小程序](https://github.com/iamxjb/winxin-app-watch-life.net) 开发。**
 
 ## 运行方法
 
