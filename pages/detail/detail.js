@@ -1,13 +1,9 @@
 /*
- * 
- * WordPres版微信小程序
- * author: jianbo
- * organization: 守望轩  www.watch-life.net
- * github:    https://github.com/iamxjb/winxin-app-watch-life.net
- * 技术支持微信号：iamxjb
- * 开源协议：MIT
- *  *Copyright (c) 2017 https://www.watch-life.net All rights reserved.
- * 
+ * WordPress 转微信小程序
+ * author               : pimgeek
+ * original author      : jianbo
+ * original github repo : https://github.com/iamxjb/winxin-app-watch-life.net
+ * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
 var Api = require('../../utils/api.js');
@@ -33,8 +29,6 @@ Page({
 
     isGetUserInfo:false,
 
-    
-
     dialog: {
       title: '',
       content: '',
@@ -43,22 +37,21 @@ Page({
     content:'',
     userInfo:[]
   },
-  onLoad: function (options) {
+  
+  onLoad: function(options) {
     this.fetchDetailData(options.id);
     var self = this;
     wx.getSystemInfo({
-      
-      success: function (res) {
+      success: function(res) {
         //console.info(res.windowHeight);
         self.setData({
           scrollHeight: res.windowHeight,
-          
         });
       }
     });
 
     //获取用户信息
-    app.getUserInfo(function (userInfo) {
+    app.getUserInfo(function(userInfo) {
       //更新数据
       self.setData({
         userInfo: userInfo,
@@ -66,7 +59,8 @@ Page({
       })
     });
   },
-  onShareAppMessage: function () {
+
+  onShareAppMessage: function() {
     return {
       title: '分享文章：' + this.data.detail.title.rendered,
       path: 'pages/detail/detail?id=' + this.data.detail.id,
@@ -78,8 +72,9 @@ Page({
       }
     }
   },
+
   //获取文章内容
-  fetchDetailData: function (id) {
+  fetchDetailData: function(id) {
     var self = this;
    
     wx.request({
@@ -100,8 +95,9 @@ Page({
       }
     });
   },
+
   //获取评论
-  fetchCommentData: function (data) {
+  fetchCommentData: function(data) {
     var self = this;
 
     if (!data) data = {};
@@ -162,8 +158,9 @@ Page({
       }
     });
   },
+
   //底部刷新
-  loadMore: function (e) {
+  loadMore: function(e) {
 
     var self = this;
     if (!self.data.isLastPage) {
@@ -181,8 +178,9 @@ Page({
       });
     }
   },
+
   //提交评论
-  formSubmit: function (e) { 
+  formSubmit: function(e) { 
     var self = this;   
     var name = self.data.userInfo.nickName;
     var email = "test@test.com";
@@ -276,8 +274,9 @@ Page({
     }
    
   },
+
   // 检测授权状态
-  checkSettingStatu: function (cb) {
+  checkSettingStatu: function(cb) {
     var that = this;
     // 判断是否是第一次授权，非第一次授权且授权失败则进行提醒
     wx.getSetting({
@@ -327,13 +326,12 @@ Page({
       }
     });
   },
-  confirm: function () {
+
+  confirm: function() {
     this.setData({
       'dialog.hidden': true,
       'dialog.title': '',
       'dialog.content': ''
     })
   }
-  
-
 })
