@@ -6,7 +6,7 @@
  * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
-var HOST_URI = 'https://www.watch-life.net/wp-json/wp/v2/';
+var HOST_URI = 'https://hintsnet.com/pimgeek/wp-json/wp/v2/';
 
 module.exports = {
   // 获取文章列表数据
