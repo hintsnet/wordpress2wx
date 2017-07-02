@@ -7,16 +7,18 @@
     "pages/about/about",
     "pages/list/list"
   ],
+
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#21759b",
-    "navigationBarTitleText": "守望轩",
+    "navigationBarBackgroundColor": "#339933",
+    "navigationBarTitleText": "思圆笔记",
     "navigationBarTextStyle": "#fff"
    
   },
+
   "tabBar": {
     "color": "#7A7E83",
-    "selectedColor": "#21759b",
+    "selectedColor": "#339933",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [
@@ -34,6 +36,7 @@
       }
     ]
   },
+
   "networkTimeout": {
     "request": 10000,
     "connectSocket": 10000,
