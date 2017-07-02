@@ -6,7 +6,7 @@
  * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
-var Api = require('../../utils/api.js');
+var wpApi = require('../../utils/api.js');
 var util = require('../../utils/util.js');
 var WxParse = require('../../wxParse/wxParse.js');
 var app = getApp()
@@ -155,7 +155,7 @@ Page({
     })
 
     wx.request({
-      url: Api.getPosts(data),
+      url: wpApi.getPosts(data),
       success: function (response) {
         if (response.statusCode === 200) {
           
@@ -168,7 +168,7 @@ Page({
               //var strSummary = util.removeHTML(item.content.rendered);
               // item.summary = util.cutstr(strSummary, 200, 0);
               var strdate = item.date
-              item.firstImage = Api.getContentFirstImage(item.content.rendered);
+              item.firstImage = wpApi.getContentFirstImage(item.content.rendered);
               item.date = util.cutstr(strdate, 10, 1);
               return item;
             })),
@@ -219,7 +219,7 @@ Page({
   fetchPagesData: function() {
     var self = this;
     wx.request({
-      url: Api.getPages(),
+      url: wpApi.getPages(),
       success: function (response) {
         self.setData({
           pagesList: response.data
@@ -232,7 +232,7 @@ Page({
   fetchCategoriesData: function() {
     var self = this;
     wx.request({
-      url: Api.getCategories(),
+      url: wpApi.getCategories(),
       success: function (response) {
         self.setData({
           categoriesList: response.data
