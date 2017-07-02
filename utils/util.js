@@ -1,12 +1,9 @@
 /*
- * 
- * WordPres版微信小程序
- * author: jianbo
- * organization: 守望轩  www.watch-life.net
- * github:    https://github.com/iamxjb/winxin-app-watch-life.net
- * 技术支持微信号：iamxjb
- * 开源协议：MIT
- * Copyright (c) 2017 https://www.watch-life.net All rights reserved.
+ * WordPress 转微信小程序
+ * author               : pimgeek
+ * original author      : jianbo
+ * original github repo : https://github.com/iamxjb/winxin-app-watch-life.net
+ * open source license  : MIT - https://choosealicense.com/licenses/mit/
  */
 
 function formatTime(date) {
@@ -33,7 +30,7 @@ function obj2uri(obj) {
   }).join('&');
 }
 
-function getDateDiff (dateTimeStamp) {
+function getDateDiff(dateTimeStamp) {
   var minute = 1000 * 60;
   var hour = minute * 60;
   var day = hour * 24;
@@ -70,64 +67,62 @@ function getDateDiff (dateTimeStamp) {
   return result;
 }
 
-function cutstr(str, len,flag) {
-        var str_length = 0;
-        var str_len = 0;
-        var str_cut = new String();
-        var str_len = str.length;
-        for (var i = 0; i < str_len; i++) {
-            var a = str.charAt(i);
-            str_length++;
-            if (escape(a).length > 4) {
-                //中文字符的长度经编码之后大于4  
-                str_length++;
-            }
-            str_cut = str_cut.concat(a);
-            if (str_length >= len) {
-              if (flag == 0){
-                str_cut = str_cut.concat("...");
-
-              }              
-                
-                return str_cut;
-            }
-           
-        }
-        //如果给定字符串小于指定长度，则返回源字符串；  
-        if (str_length < len) {
-            return str;
-        }
-    }
-
-  function removeHTML (s) {
-    var str=s.replace(/<\/?.+?>/g,"");    
-    return str.replace(/ /g,"");
-  }
-
-  function formatDateTime(s)
-  {
-    //var str = s.replace("t", " ");
-    return s.replace("T", " ");
-
-  }
-
-  var compare = function (prop) {
-    return function (obj1, obj2) {
-      var val1 = obj1[prop];
-      var val2 = obj2[prop]; if (val1 > val2) {
-        return -1;
-      } else if (val1 < val2) {
-        return 1;
-      } else {
-        return 0;
+function cutstr(str, len, flag) {
+  var str_length = 0;
+  var str_len = 0;
+  var str_cut = new String();
+  var str_len = str.length;
+  for (var i = 0; i < str_len; i++) {
+      var a = str.charAt(i);
+      str_length++;
+      if (escape(a).length > 4) {
+          //中文字符的长度经编码之后大于4  
+          str_length++;
       }
+      str_cut = str_cut.concat(a);
+      if (str_length >= len) {
+        if (flag == 0){
+          str_cut = str_cut.concat("...");
+
+        }              
+          
+          return str_cut;
+      }
+      
+  }
+  //如果给定字符串小于指定长度，则返回源字符串；  
+  if (str_length < len) {
+      return str;
+  }
+}
+
+function removeHTML (s) {
+  var str=s.replace(/<\/?.+?>/g,"");    
+  return str.replace(/ /g,"");
+}
+
+function formatDateTime(s) {
+  //var str = s.replace("t", " ");
+  return s.replace("T", " ");
+}
+
+var compare = function(prop) {
+  return function (obj1, obj2) {
+    var val1 = obj1[prop];
+    var val2 = obj2[prop]; if (val1 > val2) {
+      return -1;
+    } else if (val1 < val2) {
+      return 1;
+    } else {
+      return 0;
     }
   }
+}
 
-  /* 
+/* 
  * 判断图片类型 
  */  
-function checkImgType(filePath){  
+function checkImgType(filePath) {  
   if (!/\.(gif|jpg|jpeg|png|GIF|JPG|PNG)$/.test(filePath)) {
        return false;
   }
@@ -153,5 +148,4 @@ module.exports = {
   compare: compare,
   checkImgType: checkImgType,
   isEmptyObject: isEmptyObject
-  
 }
