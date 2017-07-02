@@ -64,14 +64,9 @@
 
 
   <scroll-view style="height:{{scrollHeight}}px;" scroll-y="true"  lower-threshold="100rpx">
-
-
     <view class="header" style="display:{{displayHeader}}">
-    <image src="../../images/logo.gif" style="height:120rpx;width:400rpx"></image>
-    <view>
-      守望生活, 审视自我,宁静雅致的小轩馆.
+      <template is="tempHeader" />
     </view>
-  </view>
 
     <view class="index-header" style="display:{{displaySwiper}}">
       <swiper class="index-swiper" indicator-dots="true" interval="10000" autoplay="true">
