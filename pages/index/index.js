@@ -9,52 +9,61 @@
 var wpApi = require('../../utils/api.js');
 var util = require('../../utils/util.js');
 var WxParse = require('../../wxParse/wxParse.js');
+var wxApi = require('../../utils/wxApi.js')
+var wxRequest = require('../../utils/wxRequest.js')
+
+import config from '../../utils/config.js'
+
+var pageCount = config.getPageCount;
 
 Page({
   data: {
-    title: '文章列表',
-    postsList: {},
-    pagesList: {},
-    categoriesList: {},
-    postsShowSwiperList: {},
-
-    isLastPage:false,
-    
+    postsList: [],
+    postsShowSwiperList: [],
+    isLastPage: false,
     page: 1,
     search: '',
     categories: 0,
-
-    scrollHeight: 0,
-
-    displayHeader:"none",
-    displaySwiper: "block",
+    showerror: "none",
+    showCategoryName: "",
+    categoryName: "",
+    showallDisplay: "block",
+    displayHeader: "none",
+    displaySwiper: "none",
     floatDisplay: "none",
-
-    //  侧滑菜单
-    maskDisplay: 'none',
-    slideHeight: 0,
-    slideRight: 0,
-    slideWidth: 0,
-    slideDisplay: 'block',
-    screenHeight: 0,
-    screenWidth: 0,
-    slideAnimation: {}
-
+    displayfirstSwiper: "none",
+    topNav: []
   },
 
-  formSubmit: function(e) {
+  formSubmit: function (e) {
     var url = '../list/list'
-    if (e.detail.value.input != '') {
-      url = url + '?search=' + e.detail.value.input;
+    var key = '';
+    if (e.currentTarget.id == "search-input") {
+      key = e.detail.value;
     }
-    wx.navigateTo({
-      url: url
-    })
+    else {
+
+      key = e.detail.value.input;
+
+    }
+    if (key != '') {
+      url = url + '?search=' + key;
+      wx.navigateTo({
+        url: url
+      })
+    }
+    else {
+      wx.showModal({
+        title: '提示',
+        content: '请输入内容',
+        showCancel: false,
+      });
+    }
   },
 
-  onShareAppMessage: function() {
+  onShareAppMessage: function () {
     return {
-      title: '“守望轩”网站微信小程序',
+      title: '“' + config.getWebsiteName + '”网站微信小程序,基于WordPress版小程序构建.技术支持：www.watch-life.net',
       path: 'pages/index/index',
       success: function (res) {
         // 转发成功
@@ -64,76 +73,92 @@ Page({
       }
     }
   },
-
-  onReachBottom: function() {
-    //console.log("xialajiazai");
-  },
-
-  onLoad: function(options) {
-    var self = this;
-    if (options.categoryID && options.categoryID != 0) {
-      self.setData({
-        categories: options.categoryID
-      })
-    }
-    if (options.search && options.search != '') {
-      self.setData({
-        search: options.search
-
-      })
-    }
-    this.fetchTopFivePosts();
-
-    wx.getSystemInfo({
-      success: function (res) {
-        //console.info(res.windowHeight);
-        self.setData({
-          scrollHeight: res.windowHeight,
-          //screenWidth: res.windowWidth,
-          slideHeight: res.windowHeight,
-          slideRight: res.windowWidth,
-          slideWidth: res.windowWidth * 0.7
-        });
-      }
-    });
-  },
-
-  fetchTopFivePosts: function() {
+  onPullDownRefresh: function () {
     var self = this;
     self.setData({
+      showerror: "none",
+      showallDisplay: "none",
+      displaySwiper: "none",
+      floatDisplay: "none",
+      isLastPage: false,
+      page: 0,
       postsShowSwiperList: []
     });
+    this.fetchTopFivePosts();
 
-    //先优先获取置顶的文章
-    wx.request({
-      url: wpApi.getStickyPosts(),
-      success: function (response) {
-        if (response.data.length > 0) {
-          self.setData({
-            postsShowSwiperList: self.data.postsShowSwiperList.concat(response.data.map(function (item) {
-              item.firstImage = wpApi.getContentFirstImage(item.content.rendered);
-              return item;
-            }))
-          });
-          self.fetchPostsData(self.data);
-        } else {
-          self.setData({
-            displaySwiper: "none",
-            displayHeader:"block"
-          });
-          self.fetchPostsData(self.data);
-        }
-      },
-      fail: function (response) {
-        //var temp = response.data;
-      }
+  },
+  onReachBottom: function () {
+
+  },
+  onLoad: function (options) {
+    var self = this;
+    this.fetchTopFivePosts();
+    self.setData({
+      topNav: config.getIndexNav
     });
+
+  },
+  onShow: function (options) {
+    wx.setStorageSync('openLinkCount', 0);
+  },
+  fetchTopFivePosts: function () {
+    var self = this;
+    //取置顶的文章
+    var getPostsRequest = wxRequest.getRequest(wpApi.getSwiperPosts());
+    getPostsRequest.then(response => {
+      if (response.data.status == '200' && response.data.posts.length > 0) {
+        self.setData({
+          postsShowSwiperList: response.data.posts,
+          postsShowSwiperList: self.data.postsShowSwiperList.concat(response.data.posts.map(function (item) {
+            //item.firstImage = wpApi.getContentFirstImage(item.content.rendered);
+            if (item.post_medium_image_300 == null || item.post_medium_image_300 == '') {
+              if (item.content_first_image != null && item.content_first_image != '') {
+                item.post_medium_image_300 = item.content_first_image;
+              }
+              else {
+                item.post_medium_image_300 = "../../images/logo700.png";
+              }
+
+            }
+            return item;
+          })),
+          showallDisplay: "block",
+          displaySwiper: "block"
+        });
+
+      }
+      else {
+        self.setData({
+          displaySwiper: "none",
+          displayHeader: "block",
+          showallDisplay: "block",
+
+        });
+
+      }
+
+    })
+      .then(response => {
+        self.fetchPostsData(self.data);
+
+      })
+      .catch(function (response) {
+        console.log(response);
+        self.setData({
+          showerror: "block",
+          floatDisplay: "none"
+        });
+
+      })
+      .finally(function () {
+
+      });
+
   },
 
-  // 获取文章列表数据
-  fetchPostsData: function(data) {
+  //获取文章列表数据
+  fetchPostsData: function (data) {
     var self = this;
-
     if (!data) data = {};
     if (!data.page) data.page = 1;
     if (!data.categories) data.categories = 0;
@@ -143,55 +168,53 @@ Page({
         postsList: []
       });
     };
-
     wx.showLoading({
-      title: '加载中',
-    })
-
-    wx.request({
-      url: wpApi.getPosts(data),
-      success: function (response) {
+      title: '正在加载',
+      mask: true
+    });
+    var getPostsRequest = wxRequest.getRequest(wpApi.getPosts(data));
+    getPostsRequest
+      .then(response => {
         if (response.statusCode === 200) {
-          if (response.data.length < 6) {
+
+          if (response.data.length < pageCount) {
             self.setData({
               isLastPage: true
             });
           }
-          //console.log(response);       
           self.setData({
-            //postsList: response.data
             floatDisplay: "block",
             postsList: self.data.postsList.concat(response.data.map(function (item) {
-              //var strSummary = util.removeHTML(item.content.rendered);
-              // item.summary = util.cutstr(strSummary, 200, 0);
+
               var strdate = item.date
-              item.firstImage = wpApi.getContentFirstImage(item.content.rendered);
+              if (item.category_name != null) {
+
+                item.categoryImage = "../../images/category.png";
+              }
+              else {
+                item.categoryImage = "";
+              }
+
+              if (item.post_thumbnail_image == null || item.post_thumbnail_image == '') {
+                item.post_thumbnail_image = "../../images/logo700.png";
+              }
               item.date = util.cutstr(strdate, 10, 1);
               return item;
             })),
+
           });
-
-          if (data.page == 1) {
-            self.fetchCategoriesData();
-          }
-
           setTimeout(function () {
             wx.hideLoading();
-            wx.showToast({
-              title: '加载完毕',
-              icon: 'success',
-              duration: 900
-            })
           }, 900);
         }
         else {
           if (response.data.code == "rest_post_invalid_page_number") {
             self.setData({
-              isLastPage:true
+              isLastPage: true
             });
             wx.showToast({
               title: '没有更多内容',
-              mask:false,
+              mask: false,
               duration: 1500
             });
           }
@@ -202,18 +225,43 @@ Page({
             })
           }
         }
-      }
-    });
-  },
 
-  // 底部刷新
-  loadMore: function(e) {
+
+      })
+      .catch(function (response) {
+        if (data.page == 1) {
+
+          self.setData({
+            showerror: "block",
+            floatDisplay: "none"
+          });
+
+        }
+        else {
+          wx.showModal({
+            title: '加载失败',
+            content: '加载数据失败,请重试.',
+            showCancel: false,
+          });
+          self.setData({
+            page: data.page - 1
+          });
+        }
+
+      })
+      .finally(function (response) {
+        wx.hideLoading();
+        wx.stopPullDownRefresh();
+      });
+  },
+  //加载分页
+  loadMore: function (e) {
     var self = this;
     if (!self.data.isLastPage) {
       self.setData({
         page: self.data.page + 1
       });
-      console.log('当前页' + self.data.page);
+      //console.log('当前页' + self.data.page);
       this.fetchPostsData(self.data);
     } else {
       wx.showToast({
@@ -223,35 +271,8 @@ Page({
       });
     }
   },
-
-  // 获取页面列表
-  fetchPagesData: function() {
-    var self = this;
-    wx.request({
-      url: wpApi.getPages(),
-      success: function(response) {
-        self.setData({
-          pagesList: response.data
-        });
-      }
-    });
-  },
-
-  // 获取分类列表
-  fetchCategoriesData: function() {
-    var self = this;
-    wx.request({
-      url: wpApi.getCategories(),
-      success: function (response) {
-        self.setData({
-          categoriesList: response.data
-        });
-      }
-    });
-  },
-
   // 跳转至查看文章详情
-  redictDetail: function(e) {
+  redictDetail: function (e) {
     // console.log('查看文章');
     var id = e.currentTarget.id,
       url = '../detail/detail?id=' + id;
@@ -259,76 +280,90 @@ Page({
       url: url
     })
   },
+  //首页图标跳转
+  onNavRedirect: function (e) {
+    var redicttype = e.currentTarget.dataset.redicttype;
+    var url = e.currentTarget.dataset.url == null ? '' : e.currentTarget.dataset.url;
+    var appid = e.currentTarget.dataset.appid == null ? '' : e.currentTarget.dataset.appid;
+    var extraData = e.currentTarget.dataset.extraData == null ? '' : e.currentTarget.dataset.extraData;
+    if (redicttype == 'apppage') {//跳转到小程序内部页面         
+      wx.navigateTo({
+        url: url
+      })
+    }
+    else if (redicttype == 'webpage')//跳转到web-view内嵌的页面
+    {
+      url = '../webpage/webpage?url=' + url;
+      wx.navigateTo({
+        url: url
+      })
+    }
+    else if (redicttype == 'miniapp')//跳转到其他app
+    {
+      wx.navigateToMiniProgram({
+        appId: appid,
+        envVersion: 'release',
+        path: url,
+        extraData: extraData,
+        success(res) {
+          // 打开成功
+        },
+        fail: function (res) {
+          console.log(res);
+        }
+      })
+    }
 
-  // 跳转至某分类下的文章列表
-  redictIndex: function(e) {
-    //console.log('查看某类别下的文章');  
-    var id = e.currentTarget.dataset.id;
-    var name = e.currentTarget.dataset.item;
-    var url = '../list/list?categoryID=' + id + '&categoryName=' + name;
-    wx.navigateTo({
-      url: url
-    });
   },
+  // 跳转至查看小程序列表页面或文章详情页
+  redictAppDetail: function (e) {
+    // console.log('查看文章');
+    var id = e.currentTarget.id;
+    var redicttype = e.currentTarget.dataset.redicttype;
+    var url = e.currentTarget.dataset.url == null ? '' : e.currentTarget.dataset.url;
+    var appid = e.currentTarget.dataset.appid == null ? '' : e.currentTarget.dataset.appid;
 
-  // 跳转至某分类下的文章列表
-  redictHome: function(e) {
+    if (redicttype == 'detailpage')//跳转到内容页
+    {
+      url = '../detail/detail?id=' + id;
+      wx.navigateTo({
+        url: url
+      })
+    }
+    if (redicttype == 'apppage') {//跳转到小程序内部页面         
+      wx.navigateTo({
+        url: url
+      })
+    }
+    else if (redicttype == 'webpage')//跳转到web-view内嵌的页面
+    {
+      url = '../webpage/webpage?url=' + url;
+      wx.navigateTo({
+        url: url
+      })
+    }
+    else if (redicttype == 'miniapp')//跳转到其他app
+    {
+      wx.navigateToMiniProgram({
+        appId: appid,
+        envVersion: 'release',
+        path: url,
+        success(res) {
+          // 打开成功
+        },
+        fail: function (res) {
+          console.log(res);
+        }
+      })
+    }
+  },
+  //返回首页
+  redictHome: function (e) {
     //console.log('查看某类别下的文章');  
     var id = e.currentTarget.dataset.id,
       url = '/pages/index/index';
     wx.switchTab({
       url: url
     });
-  },
-
-  // 浮动球移动事件
-  ballMoveEvent: function(e) {
-    var touchs = e.touches[0];
-    var pageX = touchs.pageX;
-    var pageY = touchs.pageY;
-    if (pageX < 25) return;
-    if (pageX > this.data.screenWidth - 25) return;
-    if (this.data.screenHeight - pageY <= 25) return;
-    if (pageY <= 25) return;
-    var x = this.data.screenWidth - pageX - 25;
-    var y = this.data.screenHeight - pageY - 25;
-    this.setData({
-      ballBottom: y,
-      ballRight: x
-    });
-  },
-
-  // 浮动球点击->侧栏展开
-  ballClickEvent: function() {
-    slideUp.call(this);
-  },
-
-  // 遮罩点击->侧栏关闭
-  slideCloseEvent: function() {
-    slideDown.call(this);
   }
 })
-
-// 侧栏展开
-function slideUp() {
-  var animation = wx.createAnimation({
-    duration: 600
-  });
-  this.setData({ maskDisplay: 'block' });
-  animation.translateX('100%').step();
-  this.setData({
-    slideAnimation: animation.export()
-  });
-}
-
-// 侧栏关闭
-function slideDown() {
-  var animation = wx.createAnimation({
-    duration: 800
-  });
-  animation.translateX('-100%').step();
-  this.setData({
-    slideAnimation: animation.export()
-  });
-  this.setData({ maskDisplay: 'none' });
-}

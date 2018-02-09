@@ -1,0 +1,3 @@
+<template name="tempCopyright">
+  <view>小程序著作权 ©2018 守望轩 watch-life.net</view>
+</template>

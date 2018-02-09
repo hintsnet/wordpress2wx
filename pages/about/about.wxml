@@ -1,36 +1,52 @@
+<!--
+/*
+ * WordPress 转微信小程序
+ * author               : pimgeek
+ * original author      : jianbo
+ * original github repo : https://github.com/iamxjb/winxin-app-watch-life.net
+ * open source license  : MIT - https://choosealicense.com/licenses/mit/
+ */
+-->
+
+<import src="../../wxParse/wxParse.wxml" />
 <import src="../../templates/header.wxml" />
-<view class="container">
-  <template is="tempHeader" />
-  <view class="about-article ">
-    <view class="about-title">
-      关于“守望轩”官方小程序
-    </view>
-    
+<import src="../../templates/copyright.wxml" />
 
-     <view class="about-desc">
-      “守望轩”官方小程序采用WordPress rest api作为后端服务,将微信小程序和WordPress结合，通过微信小程序访问WordPress网站。
+<view class="container" style="display:{{display}}">
+    <template is="tempHeader" />
+
+    <view class="wrapper">
+        <view class="excerpt">
+            <!--  <rich-text nodes="{{pageData.content.rendered}}"></rich-text> -->
+            <template is="wxParse" data="{{wxParseData:article.nodes}}" />
+
+        </view>
+
+        <view style='text-align:center'>
+            <button class="gotowebpage-button" formType="submit" size="mini" bindtap="gotowebpage">打开“守望轩”网站</button>
+            <modal title="{{dialog.title}}" hidden="{{dialog.hidden}}" no-cancel bindconfirm="confirm">{{dialog.content}}</modal>
+        </view>
+        <view class="praisePost">
+            <view style='text-align:center'>
+                <button class="praise-button" formType="submit" size="mini" bindtap="praise">捐赠</button>
+
+                <modal title="{{dialog.title}}" hidden="{{dialog.hidden}}" no-cancel bindconfirm="confirm">{{dialog.content}}</modal>
+            </view>
+            <view class="praiseTitle">
+                <view style='margin-top: 15rpx;'>
+                    <text>谢谢以下赞赏或捐赠的朋友</text>
+                </view>
+            </view>
+            <view class="praiseText">
+                <block wx:key="id" wx:for="{{praiseList}}">
+                    <image src="{{item}}" class="gravatarLikeImg"></image>
+                </block>
+            </view>
+        </view>
     </view>
 
-    <view class="about-desc">
-      “守望轩”官方小程序部分采用了开源的产品的代码,秉承开源思想,本程序是开放源代码的。
+      <view class="copyright">
+        <template is="tempCopyright" />
     </view>
 
-    <view class="about-desc">
-      github：https://github.com/iamxjb/winxin-app-watch-life.net
-    </view>
-     <view class="about-desc">
-      开源协议：MIT
-    </view>
-
-    <view class="about-desc">
-      技术支持网站：https://www.watch-life.net
-    </view>
-
-    <view class="about-desc">
-      开发者：Jianbo
-    </view>
-    <view class="about-desc">
-      微信号：iamxjb
-    </view>
-  </view>
 </view>

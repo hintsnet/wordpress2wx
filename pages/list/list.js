@@ -9,8 +9,10 @@
 var wpApi = require('../../utils/api.js');
 var util = require('../../utils/util.js');
 var WxParse = require('../../wxParse/wxParse.js');
-var app = getApp()
-
+var wxApi = require('../../utils/wxApi.js')
+var wxRequest = require('../../utils/wxRequest.js')
+import config from '../../utils/config.js'
+var pageCount = config.getPageCount;
 Page({
   data: {
     title: '文章列表',
@@ -18,39 +20,21 @@ Page({
     pagesList: {},
     categoriesList: {},
     postsShowSwiperList: {},
-
-
     isLastPage: false,
-
     page: 1,
     search: '',
     categories: 0,
-
-   
-    scrollHeight: 0,
-
+    categoriesName: '',
+    categoriesImage: "",
+    showerror: "none",
+    isCategoryPage: "none",
+    isSearchPage: "none",
+    showallDisplay: "block",
     displaySwiper: "block",
     floatDisplay: "none",
-
-    listHeader:"",
-
-
-
-
-    //  侧滑菜单
-    maskDisplay: 'none',
-    slideHeight: 0,
-    slideRight: 0,
-    slideWidth: 0,
-    slideDisplay: 'block',
-    screenHeight: 0,
-    screenWidth: 0,
-    slideAnimation: {}
-
-
+    searchKey: "",
   },
-
-  formSubmit: function(e) {
+  formSubmit: function (e) {
     var url = '../list/list'
     if (e.detail.value.input != '') {
       url = url + '?search=' + e.detail.value.input;
@@ -59,30 +43,52 @@ Page({
       url: url
     })
   },
-
-  // onReachBottom: function () {
-  //   var self = this;
-  //   if (!self.data.isLastPage) {
-  //     self.setData({
-  //       page: self.data.page + 1
-  //     });
-  //     console.log('当前页' + self.data.page);
-  //     this.fetchPostsData(self.data);
-  //   }
-  //   else {
-  //     wx.showToast({
-  //       title: '没有更多内容',
-  //       mask: false,
-  //       duration: 1000
-  //     });
-  //   }
-
-  // }
-  // ,
-
-  //底部刷新
-  loadMore: function(e) {
-
+  onShareAppMessage: function () {
+    var title = "分享“守望轩”";
+    var path = ""
+    if (this.data.categories && this.data.categories != 0) {
+      title += "的专题：" + this.data.categoriesList.name;
+      path = 'pages/list/list?categoryID=' + this.data.categoriesList.id;
+    }
+    else {
+      title += "的搜索内容：" + this.data.searchKey;
+      path = 'pages/list/list?search=' + this.data.searchKey;
+    }
+    return {
+      title: title,
+      path: path,
+      success: function (res) {
+        // 转发成功
+      },
+      fail: function (res) {
+        // 转发失败
+      }
+    }
+  },
+  reload: function (e) {
+    var self = this;
+    if (self.data.categories && self.data.categories != 0) {
+      self.setData({
+        // categories: options.categoryID,
+        isCategoryPage: "block",
+        showallDisplay: "none",
+        showerror: "none",
+      });
+      self.fetchCategoriesData(self.data.categories);
+    }
+    if (self.data.search && self.data.search != '') {
+      self.setData({
+        //search: options.search,
+        isSearchPage: "block",
+        showallDisplay: "none",
+        showerror: "none",
+        searchKey: self.data.search
+      })
+    }
+    self.fetchPostsData(self.data);
+  },
+  //加载分页
+  loadMore: function (e) {
     var self = this;
     if (!self.data.isLastPage) {
       self.setData({
@@ -99,45 +105,33 @@ Page({
       });
     }
   },
-
-  onLoad: function(options) {
+  onLoad: function (options) {
     var self = this;
     if (options.categoryID && options.categoryID != 0) {
       self.setData({
         categories: options.categoryID,
-        listHeader: "分类：'" + options.categoryName +"'的文章"
-      })
+        isCategoryPage: "block"
+      });
+      self.fetchCategoriesData(options.categoryID);
     }
     if (options.search && options.search != '') {
+      wx.setNavigationBarTitle({
+        title: "搜索关键字：" + options.search,
+        success: function (res) {
+          // success
+        }
+      });
       self.setData({
         search: options.search,
-        listHeader: "搜索包含'" + options.search + "'文章"
-
-
+        isSearchPage: "block",
+        searchKey: options.search
       })
+      this.fetchPostsData(self.data);
     }
-
-    self.fetchPostsData(self.data);
-
-    wx.getSystemInfo({
-      success: function (res) {
-        //console.info(res.windowHeight);
-        self.setData({
-          scrollHeight: res.windowHeight,
-          //screenWidth: res.windowWidth,
-          slideHeight: res.windowHeight,
-          slideRight: res.windowWidth,
-          slideWidth: res.windowWidth * 0.7
-        });
-      }
-    });
   },
-  
   //获取文章列表数据
-  fetchPostsData: function(data) {
+  fetchPostsData: function (data) {
     var self = this;
-
-  
     if (!data) data = {};
     if (!data.page) data.page = 1;
     if (!data.categories) data.categories = 0;
@@ -147,102 +141,78 @@ Page({
         postsList: []
       });
     };
-
-
-    
     wx.showLoading({
-      title: '加载中',
-    })
-
-    wx.request({
-      url: wpApi.getPosts(data),
-      success: function (response) {
-        if (response.statusCode === 200) {
-          
-          //console.log(response);       
+      title: '正在加载',
+      mask: true
+    });
+    var getPostsRequest = wxRequest.getRequest(Api.getPosts(data));
+    getPostsRequest.then(response => {
+      if (response.statusCode === 200) {
+        if (response.data.length < pageCount) {
           self.setData({
-            //postsList: response.data
-
-            floatDisplay: "block",
-            postsList: self.data.postsList.concat(response.data.map(function (item) {
-              //var strSummary = util.removeHTML(item.content.rendered);
-              // item.summary = util.cutstr(strSummary, 200, 0);
-              var strdate = item.date
-              item.firstImage = wpApi.getContentFirstImage(item.content.rendered);
-              item.date = util.cutstr(strdate, 10, 1);
-              return item;
-            })),
-
+            isLastPage: true
           });
-
-          if (data.page == 1) {            
-            self.fetchCategoriesData();
-          }
-
-          setTimeout(function () {
-            wx.hideLoading();
-            wx.showToast({
-              title: '加载完毕',
-              icon: 'success',
-              duration: 900
-            })
-          }, 900);
-
-        }
-        else
-        {
-          if (response.data.code == "rest_post_invalid_page_number") {
-
-            self.setData({
-              isLastPage: true
-            });
-            wx.showToast({
-              title: '没有更多内容',
-              mask: false,
-              duration: 1500
-            });
-          }
-          else {
-            wx.showToast({
-              title: response.data.message,
-              duration: 1500
-            })
-          }
-        }
-        
-
-      }
-    });
-  },
-  
-  //获取页面列表
-  fetchPagesData: function() {
-    var self = this;
-    wx.request({
-      url: wpApi.getPages(),
-      success: function (response) {
+        };
         self.setData({
-          pagesList: response.data
+          floatDisplay: "block",
+          showallDisplay: "block",
+          postsList: self.data.postsList.concat(response.data.map(function (item) {
+            var strdate = item.date
+            if (item.category_name != null) {
+              item.categoryImage = "../../images/topic.png";
+            }
+            else {
+              item.categoryImage = "";
+            }
+            if (item.post_thumbnail_image == null || item.post_thumbnail_image == '') {
+              item.post_thumbnail_image = '../../images/logo700.png';
+            }
+            item.date = util.cutstr(strdate, 10, 1);
+            return item;
+          })),
         });
+        // setTimeout(function () {
+        //   wx.hideLoading();
+        // }, 1500);
       }
-    });
-  },
-
-  //获取分类列表
-  fetchCategoriesData: function() {
-    var self = this;
-    wx.request({
-      url: wpApi.getCategories(),
-      success: function (response) {
-        self.setData({
-          categoriesList: response.data
-        });
+      else {
+        if (response.data.code == "rest_post_invalid_page_number") {
+          self.setData({
+            isLastPage: true
+          });
+        }
+        else {
+          wx.showToast({
+            title: response.data.message,
+            duration: 1500
+          })
+        }
       }
-    });
+    })
+      .catch(function () {
+        if (data.page == 1) {
+          self.setData({
+            showerror: "block",
+            floatDisplay: "none"
+          });
+        }
+        else {
+          wx.showModal({
+            title: '加载失败',
+            content: '加载数据失败,请重试.',
+            showCancel: false,
+          });
+          self.setData({
+            page: data.page - 1
+          });
+        }
+      })
+      .finally(function () {
+        wx.hideLoading();
+      })
   },
-
   // 跳转至查看文章详情
-  redictDetail: function(e) {
+  redictDetail: function (e) {
     // console.log('查看文章');
     var id = e.currentTarget.id,
       url = '../detail/detail?id=' + id;
@@ -250,78 +220,33 @@ Page({
       url: url
     })
   },
-
-  //跳转至某分类下的文章列表
-  redictIndex: function(e) {
-    //console.log('查看某类别下的文章');  
-    var id = e.currentTarget.dataset.id;
-    var name = e.currentTarget.dataset.item;
-    var url = '../list/list?categoryID=' + id + '&categoryName=' + name;
-    wx.navigateTo({
-      url: url
+  //获取分类列表
+  fetchCategoriesData: function (id) {
+    var self = this;
+    self.setData({
+      categoriesList: []
     });
+    var getCategoryRequest = wxRequest.getRequest(Api.getCategoryByID(id));
+    getCategoryRequest.then(response => {
+      var catImage = "";
+      if (typeof (response.data.category_thumbnail_image) == "undefined" || response.data.category_thumbnail_image == "") {
+        catImage = "../../images/website.png";
+      }
+      else {
+        catImage = response.data.category_thumbnail_image;
+      }
+      self.setData({
+        categoriesList: response.data,
+        categoriesImage: catImage,
+        categoriesName: response.name
+      });
+      wx.setNavigationBarTitle({
+        title: response.data.name,
+        success: function (res) {
+          // success
+        }
+      });
+      self.fetchPostsData(self.data);
+    })
   },
-
-  //跳转至某分类下的文章列表
-  redictHome: function(e) {
-    //console.log('查看某类别下的文章');  
-    var id = e.currentTarget.dataset.id,
-      url = '/pages/index/index';
-
-    wx.switchTab({
-      url: url
-    });
-  },
-
-  //浮动球移动事件
-  ballMoveEvent: function(e) {
-    var touchs = e.touches[0];
-    var pageX = touchs.pageX;
-    var pageY = touchs.pageY;
-    if (pageX < 25) return;
-    if (pageX > this.data.screenWidth - 25) return;
-    if (this.data.screenHeight - pageY <= 25) return;
-    if (pageY <= 25) return;
-    var x = this.data.screenWidth - pageX - 25;
-    var y = this.data.screenHeight - pageY - 25;
-    this.setData({
-      ballBottom: y,
-      ballRight: x
-    });
-  },
-
-  //浮动球点击 侧栏展开
-  ballClickEvent: function() {
-    slideUp.call(this);
-  },
-
-  //遮罩点击  侧栏关闭
-  slideCloseEvent: function() {
-    slideDown.call(this);
-  }
 })
-
-//侧栏展开
-function slideUp() {
-  var animation = wx.createAnimation({
-    duration: 600
-  });
-  this.setData({ maskDisplay: 'block' });
-  animation.translateX('100%').step();
-  this.setData({
-    slideAnimation: animation.export()
-  });
-}
-
-//侧栏关闭
-function slideDown() {
-  var animation = wx.createAnimation({
-    duration: 800
-  });
-  animation.translateX('-100%').step();
-  this.setData({
-    slideAnimation: animation.export()
-  });
-  this.setData({ maskDisplay: 'none' });
-}
-

@@ -32,6 +32,9 @@ App({
     }
   },
   globalData: {
-    userInfo: null
+    userInfo: null,
+    openid: '',
+    isGetUserInfo: false,
+    isGetOpenid: false
   }
 })

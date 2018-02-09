@@ -11,8 +11,8 @@
 <template name="tempHeader">
   <view class="header">
     <image src="../../images/logo.gif" style="width:120px;height:120px;"></image>
-    <view>
-      让思考更圆融，促成良性循环。
+    <view style='margin-top:40rpx'>
+      促成良性循环
     </view>
   </view>
 </template>
