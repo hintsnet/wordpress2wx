@@ -16,8 +16,8 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#339933",
-    "navigationBarTitleText": "思圆笔记",
+    "navigationBarBackgroundColor": "#5599EE",
+    "navigationBarTitleText": "引思网卡片库",
     "navigationBarTextStyle": "white"
   },
   "tabBar": {
