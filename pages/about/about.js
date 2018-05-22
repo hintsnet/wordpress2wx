@@ -15,6 +15,7 @@ var auth = require('../../utils/auth.js');
 import config from '../../utils/config.js'
 var app = getApp();
 
+
 Page({
   data: {
     title: '页面内容',
@@ -28,6 +29,8 @@ Page({
         content: '',
         hidden: true
     },
+    userInfo: app.globalData.userInfo,
+    isLoginPopup: false
    
     
   },
@@ -182,7 +185,6 @@ Page({
       }
 
   },
-
   userAuthorization: function () {
       var self = this;
       // 判断是否是第一次授权，非第一次授权且授权失败则进行提醒
@@ -190,8 +192,11 @@ Page({
           success: function success(res) {
               console.log(res.authSetting);
               var authSetting = res.authSetting;
-              if (util.isEmptyObject(authSetting)) {
+              if (!('scope.userInfo' in authSetting)) {
+              //if (util.isEmptyObject(authSetting)) {
                   console.log('第一次授权');
+                  self.setData({ isLoginPopup: true })
+
               } else {
                   console.log('不是第一次授权', authSetting);
                   // 没有授权的提醒
@@ -211,7 +216,7 @@ Page({
                                           console.log('打开设置', res.authSetting);
                                           var scopeUserInfo = res.authSetting["scope.userInfo"];
                                           if (scopeUserInfo) {
-                                              auth.getUsreInfo();
+                                              auth.getUsreInfo(null);
                                           }
                                       }
                                   });
@@ -219,10 +224,32 @@ Page({
                           }
                       })
                   }
+                  else {
+                      auth.getUsreInfo(null);
+
+                  }
               }
           }
       });
   },
+  agreeGetUser: function (e) {
+      var userInfo = e.detail.userInfo;
+      var self = this;
+      if (userInfo) {
+          auth.getUsreInfo(e.detail);
+          self.setData({ userInfo: userInfo });
+      }
+      setTimeout(function () {
+          self.setData({ isLoginPopup: false })
+      }, 1200);
+  },
+  closeLoginPopup() {
+      this.setData({ isLoginPopup: false });
+  },
+  openLoginPopup() {
+      this.setData({ isLoginPopup: true });
+  }
+    ,
   fetchData: function (id) {
     var self = this; 
     var getPageRequest = wxRequest.getRequest(Api.getPageByID(id));
@@ -271,7 +298,7 @@ Page({
     })    
     .then(res =>{
         if (!app.globalData.isGetOpenid) {
-            auth.getUsreInfo();
+           // auth.getUsreInfo();
         }
 
     })

@@ -25,12 +25,15 @@ Page({
         { id: '2', name: '评论', selected: false},
         { id: '3', name: '点赞', selected: false },
         { id: '4', name: '赞赏', selected: false },
-        { id: '5', name: '订阅', selected: false }
+        { id: '5', name: '订阅', selected: false },
+        { id: '6', name: '言论', selected: false }
     ],
     tab: '1',
     showerror: "none",
     shownodata:"none",
-    subscription:""  
+    subscription:"",
+    userInfo: app.globalData.userInfo,
+    isLoginPopup: false  
   },
 
   /**
@@ -39,7 +42,8 @@ Page({
   onLoad: function (options) {  
     var self = this;
     if (!app.globalData.isGetOpenid) {
-        self.getUsreInfo();        
+        //self.getUsreInfo();
+        self.userAuthorization();     
     }
     else
     {
@@ -183,7 +187,7 @@ Page({
        } 
 
       else if (tab == '3') {
-          this.setData({
+          self.setData({
               readLogs: []
           });
           if (app.globalData.isGetOpenid) {
@@ -191,7 +195,7 @@ Page({
               var getMylikePosts = wxRequest.getRequest(Api.getMyLikeUrl(openid));
               getMylikePosts.then(response => {
                   if (response.statusCode == 200) {
-                      this.setData({
+                      self.setData({
                           readLogs: self.data.readLogs.concat(response.data.data.map(function (item) {
                               count++;
                               item[0] = item.post_id;
@@ -212,7 +216,7 @@ Page({
                   }
                   else {
                       console.log(response);
-                      this.setData({
+                      self.setData({
                           showerror: 'block'
                       });
 
@@ -226,7 +230,7 @@ Page({
 
       }
         else if (tab == '4') {
-        this.setData({
+          self.setData({
             readLogs: []
         });
         if (app.globalData.isGetOpenid) {
@@ -234,7 +238,7 @@ Page({
             var getMyPraisePosts = wxRequest.getRequest(Api.getMyPraiseUrl(openid));
             getMyPraisePosts.then(response => {
                 if (response.statusCode == 200) {
-                    this.setData({
+                    self.setData({
                         readLogs: self.data.readLogs.concat(response.data.data.map(function (item) {
                             count++;
                             item[0] = item.post_id;
@@ -277,14 +281,13 @@ Page({
 
               var openid = app.globalData.openid;
               var url = Api.getSubscription() + '?openid=' + app.globalData.openid;
-              var getMysubPost = wxRequest.getRequest(url);
-              var count=0;
+              var getMysubPost = wxRequest.getRequest(url);              
               getMysubPost.then(response => {
                   if (response.statusCode == 200) {
                       var usermetaList = response.data.usermetaList;
                       if (usermetaList)
                       {
-                          this.setData({
+                          self.setData({
                               readLogs: self.data.readLogs.concat(usermetaList.map(function (item) {
                                   count++;
                                   item[0] = item.ID;
@@ -321,6 +324,46 @@ Page({
 
           
       }
+      else if (tab == '6'){
+          self.setData({
+              readLogs: []
+          });
+
+          
+          var getNewComments = wxRequest.getRequest(Api.getNewComments());
+          getNewComments.then(response => {
+              if (response.statusCode == 200) {
+                  self.setData({
+                      readLogs: self.data.readLogs.concat(response.data.map(function (item) {
+                          count++;
+                          item[0] = item.post;
+                          item[1] = util.removeHTML(item.content.rendered + '(' + item.author_name + ')');
+                          item[2] = "0";
+                          return item;
+                      }))
+                  });
+                  if (count == 0) {
+                      self.setData({
+                          shownodata: 'block'
+                      });
+                  }
+
+              }
+              else {
+                  console.log(response);
+                  self.setData({
+                      showerror: 'block'
+                  });
+
+              }
+          }).catch(function () {
+              console.log(response);
+              self.setData({
+                  showerror: 'block'
+              });
+
+          })
+      }
   },  
   userAuthorization: function () {
       var self = this;
@@ -329,8 +372,11 @@ Page({
           success: function success(res) {
               console.log(res.authSetting);
               var authSetting = res.authSetting;
-              if (util.isEmptyObject(authSetting)) {
+              if (!('scope.userInfo' in authSetting)) {
+              //if (util.isEmptyObject(authSetting)) {
                   console.log('第一次授权');
+                  self.setData({ isLoginPopup: true })
+
               } else {
                   console.log('不是第一次授权', authSetting);
                   // 没有授权的提醒
@@ -350,7 +396,7 @@ Page({
                                           console.log('打开设置', res.authSetting);
                                           var scopeUserInfo = res.authSetting["scope.userInfo"];
                                           if (scopeUserInfo) {
-                                              self.getUsreInfo();
+                                              auth.getUsreInfo(null);
                                           }
                                       }
                                   });
@@ -358,9 +404,30 @@ Page({
                           }
                       })
                   }
+                  else {
+                      auth.getUsreInfo(null);
+                  }
               }
           }
       });
+  },
+  agreeGetUser: function (e) {
+      var userInfo = e.detail.userInfo;
+      var self = this;
+      if (userInfo) {
+          auth.getUsreInfo(e.detail);
+          self.setData({ userInfo: userInfo })
+      }
+      setTimeout(function () {
+          self.setData({ isLoginPopup: false })
+      }, 1200);
+
+  },
+  closeLoginPopup() {
+      this.setData({ isLoginPopup: false });
+  },
+  openLoginPopup() {
+      this.setData({ isLoginPopup: true });
   }
   ,
     confirm: function () {

@@ -11,9 +11,7 @@ var util = require('../../utils/util.js');
 var WxParse = require('../../wxParse/wxParse.js');
 var wxApi = require('../../utils/wxApi.js')
 var wxRequest = require('../../utils/wxRequest.js')
-
 import config from '../../utils/config.js'
-
 var pageCount = config.getPageCount;
 
 Page({
@@ -88,7 +86,17 @@ Page({
 
   },
   onReachBottom: function () {
-
+    var self = this;
+    if (!self.data.isLastPage) {
+      self.setData({
+        page: self.data.page + 1
+      });
+      console.log('当前页' + self.data.page);
+      this.fetchPostsData(self.data);
+    }
+    else {
+      console.log('最后一页');
+    }
   },
   onLoad: function (options) {
     var self = this;
